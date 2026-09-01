@@ -120,7 +120,11 @@ html, body, [class*="css"], .stApp {
     color: var(--text-main) !important;
 }
 
-#MainMenu, footer, header {visibility: hidden;}
+/* Hide all default Streamlit branding, header, footer, and viewer profile badges */
+#MainMenu, footer, header, [data-testid="stDecoration"], [data-testid="stStatusWidget"], [class*="viewerBadge"], [data-testid="stToolbar"] {
+    visibility: hidden !important;
+    display: none !important;
+}
 
 /* Glowing Cyber HUD Header */
 .cyber-header {
@@ -1147,4 +1151,3 @@ st.markdown("""
     Trained on EMSCAD (17,880 listings) with Explainable Heuristics • Always independently verify job offers before transferring funds.
 </div>
 """, unsafe_allow_html=True)
-
