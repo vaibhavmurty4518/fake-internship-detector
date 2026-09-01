@@ -1,0 +1,91 @@
+{
+  "dataset_size": 17880,
+  "train_size": 14304,
+  "test_size": 3576,
+  "fraudulent_count": 866,
+  "legitimate_count": 17014,
+  "best_model": "Linear SVM",
+  "structured_feature_names": [
+    "length_chars",
+    "length_words",
+    "fee_count",
+    "fee_flag",
+    "urgency_count",
+    "urgency_flag",
+    "suspicious_phrase_count",
+    "high_amount_flag",
+    "personal_email_flag",
+    "whatsapp_flag",
+    "phone_count",
+    "url_count",
+    "exclamation_count",
+    "uppercase_ratio",
+    "telecommuting",
+    "has_company_logo",
+    "has_questions"
+  ],
+  "tfidf_max_features": 4000,
+  "all_model_reports": [
+    {
+      "model": "Logistic Regression",
+      "accuracy": 0.956096196868009,
+      "precision_macro": 0.7609823062843197,
+      "recall_macro": 0.9330402110344664,
+      "f1_macro": 0.8215835952701691,
+      "precision_fraudulent_class": 0.5268456375838926,
+      "recall_fraudulent_class": 0.9075144508670521,
+      "f1_fraudulent_class": 0.6666666666666666,
+      "confusion_matrix": [
+        [
+          3262,
+          141
+        ],
+        [
+          16,
+          157
+        ]
+      ]
+    },
+    {
+      "model": "Random Forest",
+      "accuracy": 0.9793064876957495,
+      "precision_macro": 0.9893586425079091,
+      "recall_macro": 0.7861271676300579,
+      "f1_macro": 0.8585926812585499,
+      "precision_fraudulent_class": 1.0,
+      "recall_fraudulent_class": 0.5722543352601156,
+      "f1_fraudulent_class": 0.7279411764705882,
+      "confusion_matrix": [
+        [
+          3403,
+          0
+        ],
+        [
+          74,
+          99
+        ]
+      ]
+    },
+    {
+      "model": "Linear SVM",
+      "accuracy": 0.9840604026845637,
+      "precision_macro": 0.9478188291074343,
+      "recall_macro": 0.8709222906004392,
+      "f1_macro": 0.9053553145698823,
+      "precision_fraudulent_class": 0.9084507042253521,
+      "recall_fraudulent_class": 0.7456647398843931,
+      "f1_fraudulent_class": 0.819047619047619,
+      "confusion_matrix": [
+        [
+          3390,
+          13
+        ],
+        [
+          44,
+          129
+        ]
+      ]
+    }
+  ],
+  "training_time_seconds": 69.2
+}
