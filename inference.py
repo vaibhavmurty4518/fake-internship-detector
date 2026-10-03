@@ -255,12 +255,20 @@ def predict(text, telecommuting=0, has_company_logo=0, has_questions=0, sensitiv
     financial_risk = min(100, (feats.get("fee_count", 0) * 50) + (feats.get("high_amount_flag", 0) * 45))
     urgency_risk = min(100, (feats.get("urgency_count", 0) * 35) + min(30, feats.get("exclamation_count", 0) * 5))
     channel_risk = min(100, (feats.get("personal_email_flag", 0) * 55) + (feats.get("whatsapp_flag", 0) * 35) + (10 if feats.get("url_count", 0) > 0 else 0))
+    
+    # Calculate domain & URL risk vector
+    url_count = feats.get("url_count", 0)
+    free_hosts = ["blogspot", "wixsite", "wordpress", "weebly", "tinyurl", "bit.ly", "forms.gle"]
+    has_free_host = 1 if any(fh in text.lower() for fh in free_hosts) else 0
+    domain_risk = min(100, (url_count * 15) + (has_free_host * 60) + (feats.get("personal_email_flag", 0) * 25))
+
     legitimacy_score = max(5, min(98, (
         (100 - raw_ml_score) * 0.4 +
         (30 if has_company_logo else 0) +
         (25 if has_questions else 0) +
         (0 if feats.get("low_company_info_flag", 0) else 25) -
-        (feats.get("uppercase_ratio", 0.0) * 30)
+        (feats.get("uppercase_ratio", 0.0) * 30) -
+        (has_free_host * 20)
     )))
 
     highlights = extract_matched_highlights(text)
@@ -278,6 +286,42 @@ def predict(text, telecommuting=0, has_company_logo=0, has_questions=0, sensitiv
             "urgency_risk": round(urgency_risk, 1),
             "channel_risk": round(channel_risk, 1),
             "legitimacy_score": round(legitimacy_score, 1),
+            "domain_risk": round(domain_risk, 1),
             "nlp_similarity": round(raw_ml_score, 1),
         }
     }
+
+
+def extract_text_from_file(file_obj, filename):
+    """
+    Extract text content from uploaded files (.pdf, .txt, .md, .docx).
+    """
+    import os
+    ext = os.path.splitext(filename)[1].lower()
+    if ext in [".txt", ".md"]:
+        return file_obj.read().decode("utf-8", errors="ignore")
+    elif ext == ".pdf":
+        try:
+            import pypdf
+            reader = pypdf.PdfReader(file_obj)
+            text = [page.extract_text() for page in reader.pages if page.extract_text()]
+            return "\n".join(text)
+        except Exception as e:
+            file_obj.seek(0)
+            try:
+                return file_obj.read().decode("utf-8", errors="ignore")
+            except Exception:
+                return f"[PDF Parsing Error: {e}]"
+    elif ext == ".docx":
+        try:
+            import docx
+            doc = docx.Document(file_obj)
+            return "\n".join([p.text for p in doc.paragraphs if p.text])
+        except Exception as e:
+            return f"[DOCX Parsing Error: {e}]"
+    else:
+        try:
+            return file_obj.read().decode("utf-8", errors="ignore")
+        except Exception:
+            return ""
+

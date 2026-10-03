@@ -1,20 +1,9 @@
 """
 app.py
 ------
-Ultra-Modern AI Cyber-Intelligence Dashboard for Fake Internship Detection.
-Trained on the EMSCAD benchmark dataset (17,880 listings).
-
-High-Quality Features:
-- Cyberpunk Sci-Fi HUD styling with glassmorphism and glowing neon accents
-- Holographic laser scanner animation and floating shield HUD
-- SVG Multi-Ring Radar Threat Probability Gauge with live animated ticks
-- 4-Vector Shimmer Threat Decomposition (Financial, Urgency, Channel, Legitimacy)
-- Interactive Terminal-style Keyword Inspector with color-coded glow tags
-- 1-Click Preset Scenario Hub (Fee scam, 80k Bait, WhatsApp flyer, Genuine Tech Intern)
-- Full Session History & Threat Intelligence Log with CSV/JSON/Markdown export
-- Batch CSV Scanner with live progress bar and downloadable audit dataset
-- Machine Learning Benchmark Studio (Linear SVM 98.4% vs RF vs LogReg)
-- Student Scam Survival Guide & Real-Time Defense Toolkit
+AI Fake Internship Threat Scanner - Review 3 Stage 2 Upgrade
+Premium Warm AI Security Dashboard
+Theme: Cream + Espresso Brown + Deep Maroon + Muted Gold + Glassmorphism
 """
 
 import datetime
@@ -25,7 +14,7 @@ import re
 import pandas as pd
 import streamlit as st
 
-from inference import predict, load_artifacts
+from inference import predict, load_artifacts, extract_text_from_file
 
 # ---------------------------------------------------------------------------
 # Page Configuration
@@ -54,14 +43,14 @@ if "last_result" not in st.session_state:
 
 # Preset scenarios
 PRESETS = {
-    "💸 Registration Fee Scam": """URGENT HIRING: Work From Home Data Entry Intern
+    "🚨 Upfront Registration Fee Scam": """URGENT HIRING: Work From Home Data Entry Intern
 Earn Rs 45,000 per month, no experience or qualification needed!
 Limited seats available, apply today before offer ends!
 To confirm your selection and receive your work kit, candidates must pay a refundable registration fee of Rs 999.
 Contact us immediately on WhatsApp: +91-9876543210.
 Email: hrjobs2024@gmail.com""",
 
-    "🚀 Genuine Series-B Tech Intern": """Software Engineering Intern - Backend Systems
+    "🚀 Genuine Tech Company Posting": """Software Engineering Intern - Backend Systems
 About Us: We are a Series B fintech company headquartered in Bengaluru, founded in 2018, building payment infrastructure for businesses. Learn more at www.examplefintech.com/about.
 Role: You will work with our backend engineering team on Python/Django microservices, write unit tests, and participate in daily standups and code reviews. This is a 6-month paid internship (stipend Rs 25,000/month) with potential PPO.
 Requirements: Currently pursuing B.Tech/B.E in CS/IT, familiarity with Python, REST APIs, and SQL.
@@ -74,1080 +63,964 @@ Work only 2 hours a day from your mobile phone.
 Seats filling fast, apply immediately!
 Send your details to: marketingjobs99@yahoo.com or DM us on Telegram.""",
 
-    "⚡ Urgent WhatsApp Flyer Scam": """Hiring Student Interns - Apply Immediately!
+    "⚡ Urgent WhatsApp Contact Flyer": """Hiring Student Interns - Apply Immediately!
 Only 3 spots left, hurry up, don't miss this life-changing opportunity!
 Great industry exposure, verified certificate provided within 7 days.
 Apply today, last date is tonight!
 For details WhatsApp us immediately at the number on flyer: 9811223344. Act now!""",
 
-    "🔍 Semi-Suspicious Startup Post": """Content Writing Intern needed for an early-stage startup.
+    "🔍 Informal Early-Stage Startup Post": """Content Writing Intern needed for an early-stage startup.
 Remote work from home, flexible hours, stipend Rs 7,000/month.
-We are a small team building a new lifestyle app. No formal company website yet but you can reach out over WhatsApp or personal email for details: recruiter123@gmail.com.
+We are a small team building a new lifestyle app. No formal company website yet but you can reach out over WhatsApp or personal email for details: recruiter123@blogspot.com.
 Interested candidates apply today, limited slots."""
 }
 
 # ---------------------------------------------------------------------------
-# High-Quality CSS Stylesheet: Neon Animations, Laser Scanners & Glassmorphism
+# Design System: Premium Warm Cream & Espresso Glassmorphism CSS
 # ---------------------------------------------------------------------------
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap');
 
 :root {
-    --bg-dark: #070a13;
-    --bg-card: rgba(13, 20, 38, 0.78);
-    --bg-card-hover: rgba(22, 33, 62, 0.90);
-    --border-color: rgba(56, 189, 248, 0.20);
-    --border-bright: rgba(56, 189, 248, 0.60);
-    --cyan: #38bdf8;
-    --cyan-glow: rgba(56, 189, 248, 0.45);
-    --blue: #6366f1;
-    --purple: #c084fc;
-    --green: #10b981;
-    --green-glow: rgba(16, 185, 129, 0.45);
-    --amber: #f59e0b;
-    --amber-glow: rgba(245, 158, 11, 0.45);
-    --red: #ef4444;
-    --red-glow: rgba(239, 68, 68, 0.50);
-    --text-main: #f8fafc;
-    --text-muted: #94a3b8;
+    --bg-cream: #F8F4EC;
+    --bg-surface: rgba(255, 253, 248, 0.75);
+    --bg-card: rgba(255, 255, 255, 0.82);
+    --border-warm: #E6DCCF;
+    --border-accent: #C19A62;
+    --espresso-dark: #241812;
+    --espresso-medium: #452A1D;
+    --brown-muted: #7C7067;
+    --maroon-primary: #6B1F2B;
+    --maroon-hover: #521620;
+    --gold-accent: #B08D57;
+    
+    --green-bg: rgba(34, 197, 94, 0.08);
+    --green-border: rgba(34, 197, 94, 0.30);
+    --green-text: #15803D;
+
+    --amber-bg: rgba(245, 158, 11, 0.09);
+    --amber-border: rgba(245, 158, 11, 0.30);
+    --amber-text: #B45309;
+
+    --red-bg: rgba(107, 31, 43, 0.09);
+    --red-border: rgba(107, 31, 43, 0.32);
+    --red-text: #6B1F2B;
 }
 
-/* Global resets & typography */
+/* Smooth Scrolling & Body Background */
+html {
+    scroll-behavior: smooth;
+}
+
 html, body, [class*="css"], .stApp {
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-    background: radial-gradient(1400px 800px at 50% -10%, #172554 0%, #090e1a 50%, #030712 100%) !important;
-    color: var(--text-main) !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    background-color: var(--bg-cream) !important;
+    background-image: 
+        radial-gradient(at 15% 15%, rgba(193, 154, 98, 0.08) 0px, transparent 50%),
+        radial-gradient(at 85% 85%, rgba(107, 31, 43, 0.05) 0px, transparent 50%) !important;
+    background-attachment: fixed !important;
+    color: var(--espresso-dark) !important;
 }
 
-/* Hide all default Streamlit branding, header, footer, and viewer profile badges */
+/* Hide Default Streamlit Elements */
 #MainMenu, footer, header, [data-testid="stDecoration"], [data-testid="stStatusWidget"], [class*="viewerBadge"], [data-testid="stToolbar"] {
     visibility: hidden !important;
     display: none !important;
 }
 
-/* Glowing Cyber HUD Header */
-.cyber-header {
-    text-align: center;
-    padding: 1.8rem 0 1.2rem 0;
-    position: relative;
+/* Container constraints */
+.main .block-container {
+    padding-top: 1.5rem !important;
+    padding-bottom: 3rem !important;
+    max-width: 1240px !important;
 }
 
-.shield-container {
-    position: relative;
-    display: inline-block;
-    margin-bottom: 0.4rem;
+/* Micro-Interaction Keyframes */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.shield-logo {
-    font-size: 3.6rem;
-    display: inline-block;
-    filter: drop-shadow(0 0 25px rgba(56, 189, 248, 0.75));
-    animation: float 4s ease-in-out infinite;
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
-@keyframes float {
-    0%, 100% { transform: translateY(0px) scale(1) rotate(0deg); }
-    50% { transform: translateY(-10px) scale(1.05) rotate(1deg); }
+.animate-fade {
+    animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.hero-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 2.8rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 40%, #c084fc 80%, #38bdf8 100%);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shine 6s linear infinite;
-    margin: 0.2rem 0 0.4rem 0;
-    text-shadow: 0 0 40px rgba(56, 189, 248, 0.35);
+.animate-scale {
+    animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes shine {
-    to { background-position: 200% center; }
-}
-
-.hero-sub {
-    color: var(--text-muted);
-    font-size: 1.08rem;
-    font-weight: 400;
-    max-width: 720px;
-    margin: 0 auto 1.4rem auto;
-    line-height: 1.5;
-}
-
-/* Cyber System Status Bar */
-.system-status-bar {
+/* Header Navbar Glassmorphism */
+.app-header {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-surface);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--border-warm);
+    border-radius: 16px;
+    padding: 1.2rem 1.8rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(58, 36, 24, 0.04);
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.brand-container {
+    display: flex;
     align-items: center;
     gap: 16px;
-    flex-wrap: wrap;
-    background: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--border-color);
-    border-radius: 9999px;
-    padding: 6px 20px;
-    max-width: 780px;
-    margin: 0 auto 1.5rem auto;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.74rem;
-    color: var(--cyan);
-    box-shadow: 0 0 25px rgba(56, 189, 248, 0.12);
 }
 
-.status-dot {
+.brand-icon {
+    font-size: 2.3rem;
+    background: #FAF5EE;
+    border-radius: 12px;
+    padding: 6px 12px;
+    border: 1px solid #E8DEC8;
+    box-shadow: 0 2px 8px rgba(176, 141, 87, 0.15);
+}
+
+.brand-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--espresso-dark);
+    margin: 0;
+    line-height: 1.2;
+    letter-spacing: -0.2px;
+}
+
+.brand-subtitle {
+    font-size: 0.86rem;
+    color: var(--brown-muted);
+    margin-top: 3px;
+    font-weight: 500;
+}
+
+.status-badge-ready {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(34, 197, 94, 0.09);
+    border: 1px solid rgba(34, 197, 94, 0.28);
+    color: var(--green-text);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.status-dot-green {
     width: 8px;
     height: 8px;
-    background: #10b981;
+    background: #16A34A;
     border-radius: 50%;
-    display: inline-block;
-    box-shadow: 0 0 10px #10b981;
-    animation: blink 2s infinite ease-in-out;
+    box-shadow: 0 0 6px #16A34A;
 }
 
-@keyframes blink {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.35; transform: scale(0.85); }
-}
-
-/* Glassmorphic Container Cards with Laser Scan effect */
-.cyber-card {
-    background: var(--bg-card);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid var(--border-color);
-    border-radius: 18px;
-    padding: 1.5rem 1.7rem;
-    margin-bottom: 1.3rem;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 10px 35px 0 rgba(0, 0, 0, 0.45), inset 0 1px 1px 0 rgba(255, 255, 255, 0.08);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.cyber-card:hover {
-    border-color: var(--border-bright);
-    box-shadow: 0 14px 45px 0 rgba(56, 189, 248, 0.20), inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px);
-}
-
-/* Subtle laser sweep animation */
-.cyber-card::after {
-    content: "";
-    position: absolute;
-    top: -100%;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-    box-shadow: 0 0 15px var(--cyan);
-    animation: laser-sweep 8s linear infinite;
-    opacity: 0.4;
-}
-
-@keyframes laser-sweep {
-    0% { top: -10%; }
-    50% { top: 110%; }
-    100% { top: 110%; }
-}
-
-.card-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.92rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.4px;
-    color: var(--cyan);
-    margin-bottom: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 9px;
-}
-
-/* Risk Alert Banners with Holographic Glow */
-.threat-banner {
-    border-radius: 18px;
-    padding: 1.7rem 1.5rem;
-    text-align: center;
-    margin-bottom: 1.6rem;
-    position: relative;
-    overflow: hidden;
-    animation: pulse-glow 3s infinite ease-in-out;
-}
-
-@keyframes pulse-glow {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.008); }
-}
-
-.threat-banner.HIGH {
-    background: radial-gradient(circle at 50% 50%, rgba(239, 68, 68, 0.26) 0%, rgba(15, 23, 42, 0.90) 100%);
-    border: 2px solid #ef4444;
-    box-shadow: 0 0 45px rgba(239, 68, 68, 0.40), inset 0 0 20px rgba(239, 68, 68, 0.20);
-}
-
-.threat-banner.MEDIUM {
-    background: radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.26) 0%, rgba(15, 23, 42, 0.90) 100%);
-    border: 2px solid #f59e0b;
-    box-shadow: 0 0 45px rgba(245, 158, 11, 0.35), inset 0 0 20px rgba(245, 158, 11, 0.15);
-}
-
-.threat-banner.LOW {
-    background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.24) 0%, rgba(15, 23, 42, 0.90) 100%);
-    border: 2px solid #10b981;
-    box-shadow: 0 0 45px rgba(16, 185, 129, 0.30), inset 0 0 20px rgba(16, 185, 129, 0.15);
-}
-
-.threat-score-number {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 3.6rem;
-    font-weight: 800;
-    line-height: 1;
-    margin: 0.35rem 0;
-    letter-spacing: -1px;
-}
-
-.threat-label {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.6rem;
-    font-weight: 800;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-}
-
-/* Shimmer Vector Progress Bars */
-.vector-row {
-    margin-bottom: 1rem;
-}
-
-.vector-head {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.84rem;
-    font-weight: 600;
-    margin-bottom: 5px;
-}
-
-.vector-bar-bg {
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 999px;
-    height: 10px;
-    overflow: hidden;
-    position: relative;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.vector-bar-fill {
-    height: 100%;
-    border-radius: 999px;
-    position: relative;
-    transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 0 12px currentColor;
-}
-
-.vector-bar-fill::after {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; bottom: 0; right: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    animation: shimmer-sweep 2.5s infinite;
-}
-
-@keyframes shimmer-sweep {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-}
-
-/* Explainable Indicators Card */
-.indicator-box {
-    background: rgba(255, 255, 255, 0.035);
-    border-left: 4px solid var(--amber);
+.model-tag {
+    background: #FAF5EE;
+    border: 1px solid var(--border-warm);
+    color: var(--espresso-medium);
+    padding: 6px 14px;
     border-radius: 10px;
-    padding: 1rem 1.2rem;
-    margin-bottom: 0.85rem;
-    transition: all 0.25s ease;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.8rem;
+    font-weight: 600;
 }
 
-.indicator-box:hover {
-    transform: translateX(6px);
-    background: rgba(255, 255, 255, 0.07);
+/* Metric Cards Grid */
+.metrics-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.1rem;
+    margin-bottom: 1.5rem;
 }
 
-.indicator-box.danger {
-    border-left-color: var(--red);
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.12);
+@media (max-width: 768px) {
+    .metrics-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
-.indicator-box.warning {
-    border-left-color: var(--amber);
-    box-shadow: 0 0 15px rgba(245, 158, 11, 0.10);
-}
-
-.indicator-title {
-    font-weight: 700;
-    font-size: 0.98rem;
-    color: var(--text-main);
-    display: flex;
-    align-items: center;
-    gap: 9px;
-}
-
-.indicator-desc {
-    font-size: 0.86rem;
-    color: var(--text-muted);
-    margin-top: 5px;
-    line-height: 1.5;
-}
-
-/* Terminal Keyword Inspector Window */
-.terminal-window {
-    background: #060913;
-    border: 1px solid rgba(56, 189, 248, 0.35);
+.metric-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-warm);
     border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    padding: 1.15rem 1.3rem;
+    box-shadow: 0 4px 16px rgba(58, 36, 24, 0.03);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.terminal-topbar {
-    background: #0d1527;
-    padding: 8px 14px;
-    display: flex;
+.metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(58, 36, 24, 0.07);
+    border-color: var(--border-accent);
+}
+
+.metric-label {
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--brown-muted);
+    margin-bottom: 0.35rem;
+}
+
+.metric-value {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--espresso-dark);
+    line-height: 1.1;
+}
+
+.metric-sub {
+    font-size: 0.78rem;
+    color: var(--gold-accent);
+    font-weight: 600;
+    margin-top: 0.3rem;
+}
+
+/* Section Cards & Panels */
+.warm-glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-warm);
+    border-radius: 16px;
+    padding: 1.6rem;
+    box-shadow: 0 4px 20px rgba(58, 36, 24, 0.04);
+    margin-bottom: 1.5rem;
+    transition: all 0.25s ease;
+}
+
+.card-heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--espresso-dark);
+    margin-bottom: 0.3rem;
+}
+
+.card-desc {
+    font-size: 0.88rem;
+    color: var(--brown-muted);
+    margin-bottom: 1.1rem;
+}
+
+/* Dynamic Adaptive Risk Glass Panels */
+.risk-panel-idle {
+    background: rgba(255, 255, 255, 0.70);
+    backdrop-filter: blur(12px);
+    border: 1px dashed var(--border-accent);
+    border-radius: 16px;
+    padding: 3rem 1.8rem;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(58, 36, 24, 0.03);
+}
+
+.risk-panel-low {
+    background: var(--green-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--green-border);
+    border-radius: 16px;
+    padding: 1.6rem;
+    box-shadow: 0 6px 24px rgba(34, 197, 94, 0.06);
+    animation: fadeInScale 0.4s ease-out;
+}
+
+.risk-panel-medium {
+    background: var(--amber-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--amber-border);
+    border-radius: 16px;
+    padding: 1.6rem;
+    box-shadow: 0 6px 24px rgba(245, 158, 11, 0.07);
+    animation: fadeInScale 0.4s ease-out;
+}
+
+.risk-panel-high {
+    background: var(--red-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--red-border);
+    border-radius: 16px;
+    padding: 1.6rem;
+    box-shadow: 0 6px 24px rgba(107, 31, 43, 0.09);
+    animation: fadeInScale 0.4s ease-out;
+}
+
+/* Badges */
+.badge-low {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--green-text);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(56, 189, 248, 0.2);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.74rem;
-    color: var(--text-muted);
-}
-
-.terminal-dots {
-    display: flex;
     gap: 6px;
 }
 
-.term-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-}
-.term-dot.red { background: #ef4444; }
-.term-dot.yellow { background: #f59e0b; }
-.term-dot.green { background: #10b981; }
-
-.highlight-container {
-    padding: 1.2rem;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.88rem;
-    line-height: 1.8;
-    color: #e2e8f0;
-    white-space: pre-wrap;
-    max-height: 340px;
-    overflow-y: auto;
-}
-
-.hl-tag {
-    padding: 3px 8px;
-    border-radius: 5px;
+.badge-medium {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--amber-text);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    padding: 6px 16px;
+    border-radius: 20px;
     font-weight: 700;
-    display: inline;
-    box-shadow: 0 0 10px currentColor;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
-/* Modern Tab Styling */
-.stTabs [data-baseweb="tab-list"] {
+.badge-high {
+    background: rgba(107, 31, 43, 0.15);
+    color: var(--red-text);
+    border: 1px solid rgba(107, 31, 43, 0.35);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.score-display-number {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 3.4rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* Processing Stepper Box */
+.processing-box {
+    background: rgba(255, 253, 248, 0.9);
+    border: 1px solid var(--border-warm);
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1.2rem;
+    animation: fadeInUp 0.4s ease-out;
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
     gap: 10px;
-    background: rgba(13, 20, 38, 0.65);
-    padding: 7px;
-    border-radius: 14px;
-    border: 1px solid rgba(56, 189, 248, 0.20);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    font-size: 0.86rem;
+    color: var(--espresso-medium);
+    padding: 3px 0;
+}
+
+.step-check {
+    color: var(--maroon-primary);
+    font-weight: 700;
+}
+
+/* Indicator Badges Grid */
+.indicator-chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 0.75rem;
+}
+
+.indicator-chip {
+    background: #FFFDF9;
+    border: 1px solid var(--border-accent);
+    color: var(--espresso-medium);
+    padding: 6px 13px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.indicator-chip-danger {
+    background: #FFF5F5;
+    border: 1px solid rgba(107, 31, 43, 0.3);
+    color: var(--maroon-primary);
+    padding: 6px 13px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.indicator-chip-clean {
+    background: #F0FDF4;
+    border: 1px solid #BBF7D0;
+    color: #166534;
+    padding: 6px 13px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+/* Checklist Styling */
+.checklist-box {
+    background: #FFFDF9;
+    border: 1px solid var(--border-warm);
+    border-radius: 12px;
+    padding: 1.1rem;
+    margin-top: 1.1rem;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 0.85rem;
+    color: var(--espresso-dark);
+    padding: 4px 0;
+}
+
+/* Vector Table */
+.vector-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.75rem;
+    font-size: 0.88rem;
+}
+
+.vector-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-warm);
+}
+
+.vector-table td:last-child {
+    text-align: right;
+    font-weight: 700;
+}
+
+/* Streamlit Button Overrides with Smooth Click Micro-Interactions */
+.stButton button {
+    background: linear-gradient(135deg, #6B1F2B 0%, #521620 100%) !important;
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+    border: none !important;
+    padding: 0.55rem 1.4rem !important;
+    box-shadow: 0 4px 12px rgba(107, 31, 43, 0.20) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.stButton button:hover {
+    transform: translateY(-2px) scale(1.01) !important;
+    box-shadow: 0 6px 18px rgba(107, 31, 43, 0.32) !important;
+}
+
+.stButton button:active {
+    transform: translateY(1px) scale(0.98) !important;
+    box-shadow: 0 2px 6px rgba(107, 31, 43, 0.20) !important;
+}
+
+/* Navigation Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+    background-color: var(--bg-surface);
+    backdrop-filter: blur(10px);
+    padding: 6px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border-warm);
+    margin-bottom: 1.3rem;
 }
 
 .stTabs [data-baseweb="tab"] {
-    height: 46px;
-    border-radius: 10px !important;
-    color: var(--text-muted) !important;
-    font-weight: 600 !important;
-    font-size: 0.90rem !important;
-    padding: 0 18px !important;
-    transition: all 0.25s ease !important;
-    border: none !important;
+    font-weight: 600;
+    color: var(--brown-muted);
+    border-radius: 8px;
+    padding: 8px 16px;
+    transition: all 0.2s ease;
 }
 
 .stTabs [aria-selected="true"] {
-    background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(99, 102, 241, 0.25)) !important;
-    color: #38bdf8 !important;
-    border: 1px solid rgba(56, 189, 248, 0.5) !important;
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.25) !important;
-}
-
-/* Custom Interactive Buttons */
-.stButton>button {
-    background: linear-gradient(135deg, #0284c7 0%, #4f46e5 50%, #7c3aed 100%) !important;
-    background-size: 200% auto !important;
-    color: #ffffff !important;
-    font-family: 'Space Grotesk', sans-serif !important;
-    font-weight: 700 !important;
-    border: none !important;
-    border-radius: 12px !important;
-    padding: 0.85rem 1.8rem !important;
-    letter-spacing: 0.8px !important;
-    box-shadow: 0 4px 25px rgba(14, 165, 233, 0.40) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-.stButton>button:hover {
-    transform: translateY(-3px) scale(1.01) !important;
-    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.65) !important;
-    background-position: right center !important;
-}
-
-/* Secondary Button styling */
-div[data-testid="stHorizontalBlock"] .stButton>button {
-    border-radius: 10px !important;
-    padding: 0.6rem 1rem !important;
-    font-size: 0.85rem !important;
-}
-
-/* Text Area */
-.stTextArea textarea {
-    background: rgba(10, 16, 32, 0.85) !important;
-    color: #f8fafc !important;
-    border: 1px solid rgba(56, 189, 248, 0.30) !important;
-    border-radius: 14px !important;
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
-    font-size: 0.94rem !important;
-    line-height: 1.6 !important;
-    transition: all 0.25s ease;
-}
-
-.stTextArea textarea:focus {
-    border-color: #38bdf8 !important;
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.35) !important;
-}
-
-/* Dataframe Styling */
-.dataframe {
-    background: rgba(10, 16, 32, 0.85) !important;
-    border: 1px solid var(--border-color) !important;
-    border-radius: 10px !important;
+    background-color: #FAF5EE !important;
+    color: var(--maroon-primary) !important;
+    border: 1px solid var(--border-accent) !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
-# Header & System HUD Bar
+# Header & Navigation Banner
 # ---------------------------------------------------------------------------
 st.markdown("""
-<div class="cyber-header">
-    <div class="shield-container">
-        <div class="shield-logo">🛡️</div>
+<div class="app-header animate-fade">
+    <div class="brand-container">
+        <div class="brand-icon">🛡️</div>
+        <div>
+            <div class="brand-title">AI Fake Internship Threat Scanner</div>
+            <div class="brand-subtitle">AI-powered screening for suspicious job and internship postings</div>
+        </div>
     </div>
-    <div class="hero-title">AI FAKE INTERNSHIP THREAT SCANNER</div>
-    <div class="hero-sub">Next-Generation Neural Threat Screening & Deceptive Pattern Identification for Student Internships</div>
-    <div class="system-status-bar">
-        <span><span class="status-dot"></span> <strong>SYSTEM:</strong> ACTIVE</span>
-        <span>|</span>
-        <span><strong>LATENCY:</strong> ~8ms</span>
-        <span>|</span>
-        <span><strong>ENGINE:</strong> LINEAR SVM (98.4% ACC)</span>
-        <span>|</span>
-        <span><strong>EMSCAD CORPUS:</strong> 17,880 LISTINGS</span>
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <span class="status-badge-ready"><span class="status-dot-green"></span> System Ready</span>
+        <span class="model-tag">Model: Linear SVM (98.41%)</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Check model availability
-if not os.path.exists("models/model.pkl"):
-    st.error("Model artifacts not found in `models/`. Please train the model first.")
-    st.stop()
+# ---------------------------------------------------------------------------
+# Top Dashboard Metrics (4 Cards)
+# ---------------------------------------------------------------------------
+st.markdown("""
+<div class="metrics-row animate-fade">
+    <div class="metric-card">
+        <div class="metric-label">Dataset Listings</div>
+        <div class="metric-value">17,880</div>
+        <div class="metric-sub">EMSCAD Benchmark</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Model Accuracy</div>
+        <div class="metric-value">98.41%</div>
+        <div class="metric-sub">Test-Set Verified</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Active Model</div>
+        <div class="metric-value">Linear SVM</div>
+        <div class="metric-sub">Calibrated Classifier</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Risk Indicators</div>
+        <div class="metric-value">17</div>
+        <div class="metric-sub">Explainable Signals</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------
-# App Navigation Tabs
+# Navigation Tabs
 # ---------------------------------------------------------------------------
-tab_scan, tab_history, tab_batch, tab_models, tab_guide = st.tabs([
-    "🔍 Live Threat Scanner",
-    "📜 Scan History & Threat Log",
-    "📁 Batch CSV Scanner",
-    "📊 Model Analytics & Benchmark",
-    "🛡️ Student Scam Defense Guide"
+tab_scan, tab_presets, tab_batch, tab_history, tab_benchmarks, tab_guide = st.tabs([
+    "🔍 Analyze Posting",
+    "💡 Preset Hub",
+    "📁 Batch Scan",
+    "📋 Scan History",
+    "📊 Model Performance",
+    "📖 Defense Guide"
 ])
 
-# ---------------------------------------------------------------------------
-# TAB 1: Live Threat Scanner
-# ---------------------------------------------------------------------------
+# ===========================================================================
+# TAB 1: Main Analysis Workspace (2-Column Layout with Demo Mode)
+# ===========================================================================
 with tab_scan:
-    col_input, col_sidebar = st.columns([2.1, 1.1])
-
-    with col_input:
-        st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
-        st.markdown('<div class="card-title">⚡ 1-Click Preset Scam Scenarios</div>', unsafe_allow_html=True)
-        
-        # Preset buttons
-        p_cols = st.columns(3)
-        with p_cols[0]:
-            if st.button("💸 Fee Trap Scam", use_container_width=True):
-                st.session_state.active_text = PRESETS["💸 Registration Fee Scam"]
+    # Viva Demo Mode Bar
+    with st.expander("🎬 Live Presentation Demo Mode (Quick Scenario Selectors)", expanded=False):
+        st.caption("Select a prepared test case for rapid faculty demonstration:")
+        demo_cols = st.columns(3)
+        with demo_cols[0]:
+            if st.button("1️⃣ Clearly Suspicious Scam", use_container_width=True):
+                st.session_state.active_text = PRESETS["🚨 Upfront Registration Fee Scam"]
+                st.session_state.last_result = None
                 st.rerun()
-        with p_cols[1]:
-            if st.button("🚀 Genuine Tech Intern", use_container_width=True):
-                st.session_state.active_text = PRESETS["🚀 Genuine Series-B Tech Intern"]
+        with demo_cols[1]:
+            if st.button("2️⃣ Genuine Company Offer", use_container_width=True):
+                st.session_state.active_text = PRESETS["🚀 Genuine Tech Company Posting"]
+                st.session_state.last_result = None
                 st.rerun()
-        with p_cols[2]:
-            if st.button("🤑 80k Income Bait", use_container_width=True):
+        with demo_cols[2]:
+            if st.button("3️⃣ Ambiguous High-Pay Post", use_container_width=True):
                 st.session_state.active_text = PRESETS["🤑 Unrealistic 80k Income Bait"]
+                st.session_state.last_result = None
                 st.rerun()
 
-        p_cols2 = st.columns(2)
-        with p_cols2[0]:
-            if st.button("⚡ WhatsApp Flyer Scam", use_container_width=True):
-                st.session_state.active_text = PRESETS["⚡ Urgent WhatsApp Flyer Scam"]
-                st.rerun()
-        with p_cols2[1]:
-            if st.button("🔍 Semi-Suspicious Startup", use_container_width=True):
-                st.session_state.active_text = PRESETS["🔍 Semi-Suspicious Startup Post"]
-                st.rerun()
+    col_left, col_right = st.columns([1, 1], gap="large")
 
-        st.markdown("<hr style='border-color: rgba(56,189,248,0.18); margin: 1rem 0;'>", unsafe_allow_html=True)
-        st.markdown('<div class="card-title">📝 Internship Posting Details / Raw Content</div>', unsafe_allow_html=True)
+    # LEFT COLUMN: Posting Input Workspace
+    with col_left:
+        st.markdown("""
+        <div class="warm-glass-card animate-fade">
+            <div class="card-heading">Analyze a Job or Internship Posting</div>
+            <div class="card-desc">Paste the job or internship description below to screen it for suspicious characteristics.</div>
+        """, unsafe_allow_html=True)
 
         user_text = st.text_area(
-            "Posting Content",
+            "Posting Text",
             value=st.session_state.active_text,
-            height=240,
-            label_visibility="collapsed",
-            placeholder="Paste complete internship job posting, WhatsApp flyer text, offer message, or description here...",
+            height=280,
+            placeholder="Paste job title, stipend, description, contact email, requirements here...",
+            label_visibility="collapsed"
         )
-        
-        # Character count counter bar
-        char_count = len(user_text) if user_text else 0
-        word_count = len(user_text.split()) if user_text else 0
-        st.markdown(
-            f"<div style='display:flex; justify-content:space-between; font-size:0.80rem; color:var(--text-muted); margin-top:-6px;'>"
-            f"<span>📊 <strong>{word_count}</strong> words | <strong>{char_count}</strong> characters</span>"
-            f"<span>💡 Tip: Complete job descriptions yield the highest accuracy</span>"
-            f"</div>",
-            unsafe_allow_html=True
+        st.session_state.active_text = user_text
+
+        # Optional Metadata Controls
+        with st.expander("⚙️ Optional Post Metadata Flags", expanded=False):
+            mcol1, mcol2, mcol3 = st.columns(3)
+            with mcol1:
+                tc_flag = st.checkbox("Remote work", value=False)
+            with mcol2:
+                logo_flag = st.checkbox("Company logo", value=False)
+            with mcol3:
+                q_flag = st.checkbox("Screening questions", value=False)
+
+        # Document File Parsing
+        uploaded_file = st.file_uploader(
+            "Upload document (.txt, .pdf, .docx)",
+            type=["txt", "pdf", "docx", "md"],
+            help="Automatically parse offer letters or PDF postings."
         )
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with col_sidebar:
-        st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
-        st.markdown('<div class="card-title">🎛️ Detection Tuning & Metadata</div>', unsafe_allow_html=True)
-
-        sensitivity = st.slider(
-            "Scanner Sensitivity",
-            min_value=20,
-            max_value=80,
-            value=50,
-            step=5,
-            help="Higher sensitivity increases scrutiny on low-information postings and pressure phrases."
-        )
-
-        st.markdown("<div style='font-size:0.82rem; color:var(--text-muted); margin-bottom:10px;'>Verify extra signals matching EMSCAD features:</div>", unsafe_allow_html=True)
-        
-        has_logo = st.checkbox("Official company logo shown?", value=False)
-        has_questions = st.checkbox("Includes technical screening questions?", value=False)
-        telecommuting = st.checkbox("Remote / Work-from-Home role?", value=True)
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        # Clear text button
-        if st.button("🧹 Clear Workspace", use_container_width=True):
-            st.session_state.active_text = ""
-            st.session_state.last_scanned_text = None
-            st.session_state.last_result = None
-            st.rerun()
-
-    # Scan Button
-    st.markdown("<div style='margin: 0.6rem 0 1.6rem 0;'>", unsafe_allow_html=True)
-    scan_clicked = st.button("🛡️ INITIATE AI THREAT ASSESSMENT", use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # ---------------------------------------------------------------------------
-    # Evaluation & Results Display
-    # ---------------------------------------------------------------------------
-    should_run = scan_clicked or (user_text and len(user_text.strip()) > 15 and (st.session_state.last_scanned_text != user_text))
-
-    if should_run:
-        if not user_text or len(user_text.strip()) < 15:
-            st.warning("⚠️ Please provide a longer posting text (at least 15-20 words) for accurate natural language screening.")
-        else:
-            with st.spinner("⚡ Running TF-IDF Vectorizer & Linear SVM Neural Classifier..."):
-                result = predict(
-                    user_text,
-                    telecommuting=int(telecommuting),
-                    has_company_logo=int(has_logo),
-                    has_questions=int(has_questions),
-                    sensitivity_threshold=float(sensitivity),
-                )
-                st.session_state.last_scanned_text = user_text
-                st.session_state.last_result = result
-
-            # Record in session history
-            history_item = {
-                "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "snippet": user_text[:65].replace("\n", " ") + "...",
-                "risk_level": result["risk_level"],
-                "risk_score": result["risk_score"],
-                "indicators_count": len(result["indicators"]),
-                "full_text": user_text,
-                "result": result,
-            }
-            # Append if not duplicate of last item
-            if not st.session_state.history or st.session_state.history[-1]["snippet"] != history_item["snippet"]:
-                st.session_state.history.append(history_item)
-
-    if st.session_state.last_result is not None and user_text:
-        result = st.session_state.last_result
-        risk_level_code = result["risk_level"].split()[0]  # HIGH, MEDIUM, LOW
-        score = result["risk_score"]
-        badge_color = result["badge_color"]
-        vectors = result["vectors"]
-
-        # ---------------- Top Risk Banner ----------------
-        st.markdown(f"""
-        <div class="threat-banner {risk_level_code}">
-            <div class="threat-label" style="color: {badge_color};">{result['risk_level']} DETECTED</div>
-            <div class="threat-score-number" style="color: {badge_color};">{score}%</div>
-            <div style="font-size: 0.98rem; color: var(--text-muted); max-width: 650px; margin: 0.4rem auto 0 auto; line-height: 1.5;">
-                { '🚨 <strong>High-Risk Threat:</strong> Immediate red flags detected (e.g. upfront fee demand, suspicious stipend, or unverified contact). Do NOT transfer funds.' if risk_level_code == 'HIGH' else
-                  '⚠️ <strong>Moderate Suspicion:</strong> Elevated urgency, missing company credentials, or ambiguous terms. Thorough verification required.' if risk_level_code == 'MEDIUM' else
-                  '✅ <strong>Low Scam Probability:</strong> Posting matches legitimate corporate recruitment vocabulary and verified patterns.' }
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # ---------------- 3 Column Threat Breakdown ----------------
-        c_gauge, c_vectors, c_quick_rec = st.columns([1.1, 1.4, 1.2])
-
-        with c_gauge:
-            st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
-            st.markdown('<div class="card-title">🎯 Threat Probability Radar</div>', unsafe_allow_html=True)
-            
-            # SVG Multi-Ring HUD Radar Gauge
-            dash_array = f"{int(score * 2.83)}, 283"
-            st.markdown(f"""
-            <div style="text-align:center; padding: 0.6rem 0;">
-                <svg viewBox="0 0 100 100" style="width: 155px; height: 155px; filter: drop-shadow(0 0 15px {badge_color}50);">
-                    <!-- Outer Decorative Ring -->
-                    <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(56, 189, 248, 0.15)" stroke-width="1" stroke-dasharray="4, 4"/>
-                    <!-- Background Ring -->
-                    <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
-                    <!-- Active Fill Ring -->
-                    <circle cx="50" cy="50" r="42" fill="none" stroke="{badge_color}" stroke-width="7"
-                            stroke-dasharray="{dash_array}" stroke-linecap="round"
-                            transform="rotate(-90 50 50)" style="transition: stroke-dasharray 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);"/>
-                    <!-- Inner Core -->
-                    <circle cx="50" cy="50" r="32" fill="rgba(10, 16, 32, 0.9)" stroke="{badge_color}40" stroke-width="1"/>
-                    <text x="50" y="47" text-anchor="middle" fill="{badge_color}" font-size="17" font-weight="800" font-family="Space Grotesk">{score}%</text>
-                    <text x="50" y="60" text-anchor="middle" fill="#94a3b8" font-size="7" font-weight="600" font-family="JetBrains Mono">THREAT INDEX</text>
-                </svg>
-                <div style="font-size:0.82rem; color:var(--text-muted); margin-top:8px;">
-                    Neural Model Confidence: <strong style="color:var(--cyan);">{vectors['nlp_similarity']}%</strong>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        with c_vectors:
-            st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
-            st.markdown('<div class="card-title">📊 Multi-Vector Threat Analysis</div>', unsafe_allow_html=True)
-
-            vector_items = [
-                ("💰 Upfront Fee / Financial Risk", vectors["financial_risk"], "#ef4444"),
-                ("⚡ Pressure & Urgency Tactics", vectors["urgency_risk"], "#f59e0b"),
-                ("📡 Channel & Email Integrity", vectors["channel_risk"], "#a855f7"),
-                ("🏢 Company Legitimacy Rating", vectors["legitimacy_score"], "#10b981"),
-            ]
-
-            for label, val, col in vector_items:
-                st.markdown(f"""
-                <div class="vector-row">
-                    <div class="vector-head">
-                        <span style="color:var(--text-main);">{label}</span>
-                        <span style="color:{col}; font-weight:700; font-family:'JetBrains Mono';">{val}%</span>
-                    </div>
-                    <div class="vector-bar-bg">
-                        <div class="vector-bar-fill" style="width: {min(100, max(5, val))}%; background: {col}; color: {col};"></div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        with c_quick_rec:
-            st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
-            st.markdown('<div class="card-title">📋 Safety Protocol</div>', unsafe_allow_html=True)
-
-            if risk_level_code == "HIGH":
-                st.markdown("""
-                - 🛑 **NEVER transfer money** for registration, laptops, or IDs.
-                - 🔍 **Check official domain**; verify HR on LinkedIn.
-                - 🚫 **Do not share Aadhaar/PAN** or bank details over WhatsApp.
-                - 📢 **Report listing** on cybercrime.gov.in / college cell.
-                """)
-            elif risk_level_code == "MEDIUM":
-                st.markdown("""
-                - ⚠️ Ask for a formal offer letter on corporate letterhead.
-                - 🔍 Verify company registration on MCA21 / LinkedIn.
-                - ✉️ Insist on email communication from official domain.
-                - 💡 Request a structured interview round.
-                """)
-            else:
-                st.markdown("""
-                - ✅ Posting appears consistent with genuine roles.
-                - 🔍 Always review full contract before joining.
-                - 💡 Confirm stipend payment terms and mentors.
-                """)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-        # ---------------- Terminal Keyword Inspector Window ----------------
-        st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
-        st.markdown('<div class="card-title">🔍 Interactive Keyword & Pattern Inspector</div>', unsafe_allow_html=True)
-        st.markdown("<div style='font-size:0.82rem; color:var(--text-muted); margin-bottom:12px;'>Color-coded indicators identified by the rule-based extractor:</div>", unsafe_allow_html=True)
-
-        hl_list = result["highlights"]
-        hl_html = ""
-        last_idx = 0
-        if hl_list:
-            for h in hl_list:
-                hl_html += html.escape(user_text[last_idx:h["start"]])
-                match_chunk = html.escape(user_text[h["start"]:h["end"]])
-                hl_html += f'<span class="hl-tag" style="background: {h["color"]}30; border: 1px solid {h["color"]}; color: {h["color"]};" title="{h["label"]}">{match_chunk}</span>'
-                last_idx = h["end"]
-            hl_html += html.escape(user_text[last_idx:])
-        else:
-            hl_html = html.escape(user_text)
-
-        st.markdown(f"""
-        <div class="terminal-window">
-            <div class="terminal-topbar">
-                <div class="terminal-dots">
-                    <span class="term-dot red"></span>
-                    <span class="term-dot yellow"></span>
-                    <span class="term-dot green"></span>
-                </div>
-                <span>THREAT-TOKEN-INSPECTOR.v2</span>
-                <span>{len(hl_list)} MARKERS DETECTED</span>
-            </div>
-            <div class="highlight-container">{hl_html}</div>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        # ---------------- Explainable Indicators ----------------
-        st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
-        st.markdown('<div class="card-title">🧠 Explainable AI Diagnostic Triggers</div>', unsafe_allow_html=True)
-
-        if result["indicators"]:
-            for ind in result["indicators"]:
-                is_severe = ind["key"] in ["fee_flag", "high_amount_flag"]
-                box_class = "danger" if is_severe else "warning"
-                icon = "🚨" if is_severe else "⚠️"
-                st.markdown(f"""
-                <div class="indicator-box {box_class}">
-                    <div class="indicator-title">{icon} {ind['title']}</div>
-                    <div class="indicator-desc">{ind['explanation']}</div>
-                </div>
-                """, unsafe_allow_html=True)
-        else:
-            st.markdown("""
-            <div style="padding: 0.8rem; color: var(--green); font-size: 0.90rem;">
-                ✅ No explicit rule-based red flags were detected in this posting.
-            </div>
-            """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-        # Export options for this single scan
-        exp_col1, exp_col2 = st.columns([1, 1])
-        with exp_col1:
-            json_report = json.dumps({
-                "timestamp": datetime.datetime.now().isoformat(),
-                "risk_level": result["risk_level"],
-                "risk_score": result["risk_score"],
-                "vectors": result["vectors"],
-                "indicators": result["indicators"],
-                "raw_features": result["raw_features"],
-            }, indent=2)
-            st.download_button(
-                "📥 Export JSON Audit Report",
-                data=json_report,
-                file_name="internship_threat_audit.json",
-                mime="application/json",
-                use_container_width=True
-            )
-        with exp_col2:
-            md_report = f"""# Fake Internship Threat Intelligence Report
-- **Scan Date**: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-- **Risk Assessment**: {result['risk_level']} ({result['risk_score']}%)
-- **NLP Classifier Confidence**: {result['vectors']['nlp_similarity']}%
-
-## Sub-Vector Analysis
-- Upfront Fee / Financial Risk: {result['vectors']['financial_risk']}%
-- Pressure & Urgency Tactics: {result['vectors']['urgency_risk']}%
-- Channel & Domain Integrity: {result['vectors']['channel_risk']}%
-- Company Legitimacy Rating: {result['vectors']['legitimacy_score']}%
-
-## Triggered Indicators
-""" + "\n".join([f"- **{i['title']}**: {i['explanation']}" for i in result['indicators']]) + f"""
-
-## Scanned Text
-```
-{user_text}
-```
-"""
-            st.download_button(
-                "📄 Export Markdown Report",
-                data=md_report,
-                file_name="internship_threat_report.md",
-                mime="text/markdown",
-                use_container_width=True
-            )
-
-# ---------------------------------------------------------------------------
-# TAB 2: Scan History & Threat Log
-# ---------------------------------------------------------------------------
-with tab_history:
-    st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
-    st.markdown('<div class="card-title">📜 Session Threat Log & Audit History</div>', unsafe_allow_html=True)
-
-    if not st.session_state.history:
-        st.info("ℹ️ No scans recorded in this session yet. Run a scan in the Live Threat Scanner tab to build your log.")
-    else:
-        st.markdown(f"<div style='font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;'>Total Scans in Current Session: <strong>{len(st.session_state.history)}</strong></div>", unsafe_allow_html=True)
-
-        hist_records = []
-        for i, h in enumerate(reversed(st.session_state.history)):
-            hist_records.append({
-                "#": len(st.session_state.history) - i,
-                "Timestamp": h["timestamp"],
-                "Risk Level": h["risk_level"],
-                "Risk Score": f"{h['risk_score']}%",
-                "Indicators": h["indicators_count"],
-                "Snippet": h["snippet"],
-            })
-
-        df_hist = pd.DataFrame(hist_records)
-        st.dataframe(df_hist, use_container_width=True, hide_index=True)
-
-        h_col1, h_col2, h_col3 = st.columns([1, 1, 1])
-        with h_col1:
-            csv_data = df_hist.to_csv(index=False)
-            st.download_button(
-                "📥 Export History as CSV",
-                data=csv_data,
-                file_name="scan_history.csv",
-                mime="text/csv",
-                use_container_width=True
-            )
-        with h_col2:
-            json_hist = json.dumps(st.session_state.history, indent=2)
-            st.download_button(
-                "📥 Export Full History (JSON)",
-                data=json_hist,
-                file_name="scan_history_full.json",
-                mime="application/json",
-                use_container_width=True
-            )
-        with h_col3:
-            if st.button("🗑️ Clear Session History", use_container_width=True):
-                st.session_state.history = []
-                st.session_state.last_result = None
-                st.session_state.last_scanned_text = None
+        if uploaded_file is not None:
+            extracted = extract_text_from_file(uploaded_file, uploaded_file.name)
+            if extracted and not extracted.startswith("[Error"):
+                st.session_state.active_text = extracted
+                st.success(f"✓ Extracted text from {uploaded_file.name}")
                 st.rerun()
 
-    st.markdown('</div>', unsafe_allow_html=True)
+        # Action Buttons
+        bcol1, bcol2 = st.columns([2, 1])
+        with bcol1:
+            analyze_clicked = st.button("🛡️ Analyze Posting", use_container_width=True)
+        with bcol2:
+            if st.button("Clear Input", use_container_width=True):
+                st.session_state.active_text = ""
+                st.session_state.last_result = None
+                st.rerun()
 
-# ---------------------------------------------------------------------------
-# TAB 3: Batch CSV Scanner
-# ---------------------------------------------------------------------------
-with tab_batch:
-    st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
-    st.markdown('<div class="card-title">📁 Bulk Recruitment Screening & CSV Batch Scanner</div>', unsafe_allow_html=True)
-    st.markdown("<div style='font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;'>Upload a CSV file containing multiple job/internship listings to automatically batch-screen them against our ML models.</div>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    uploaded_file = st.file_uploader("Upload CSV file (must contain a text/description column)", type=["csv"])
+    # RIGHT COLUMN: Dynamic Risk Assessment Panel
+    with col_right:
+        if analyze_clicked and user_text.strip():
+            # Execute ML Inference Pipeline
+            res = predict(
+                user_text,
+                telecommuting=1 if tc_flag else 0,
+                has_company_logo=1 if logo_flag else 0,
+                has_questions=1 if q_flag else 0
+            )
 
-    if uploaded_file is not None:
-        try:
-            df_upload = pd.read_csv(uploaded_file)
-            st.success(f"✅ Loaded {len(df_upload)} rows from CSV.")
-            
-            text_col = st.selectbox("Select the column containing the posting text:", options=df_upload.columns)
-            
-            if st.button("⚡ Run Batch Threat Analysis", use_container_width=True):
-                progress_bar = st.progress(0)
-                status_text = st.empty()
+            st.session_state.last_result = res
+            st.session_state.last_scanned_text = user_text
 
-                results_list = []
-                for idx, row in df_upload.iterrows():
-                    raw_val = str(row[text_col]) if pd.notna(row[text_col]) else ""
-                    if len(raw_val.strip()) > 10:
-                        res = predict(raw_val)
-                        results_list.append({
-                            "Risk Level": res["risk_level"],
-                            "Risk Score (%)": res["risk_score"],
-                            "NLP Confidence (%)": res["vectors"]["nlp_similarity"],
-                            "Indicators Count": len(res["indicators"]),
-                            "Indicators": ", ".join([ind["title"] for ind in res["indicators"]]) if res["indicators"] else "None",
-                        })
-                    else:
-                        results_list.append({
-                            "Risk Level": "INSUFFICIENT DATA",
-                            "Risk Score (%)": 0.0,
-                            "NLP Confidence (%)": 0.0,
-                            "Indicators Count": 0,
-                            "Indicators": "Text too short",
-                        })
-                    
-                    progress_bar.progress((idx + 1) / len(df_upload))
-                    status_text.text(f"Processed {idx + 1}/{len(df_upload)} postings...")
+            # Log to scan history
+            st.session_state.history.append({
+                "timestamp": datetime.datetime.now().strftime("%H:%M:%S"),
+                "text_snippet": user_text[:60] + "...",
+                "risk_score": res["risk_score"],
+                "risk_level": res["risk_level"],
+                "indicators_count": len(res["indicators"])
+            })
 
-                df_result = pd.concat([df_upload, pd.DataFrame(results_list)], axis=1)
-                status_text.success("🎉 Batch screening complete!")
-                
-                m1, m2, m3, m4 = st.columns(4)
-                high_cnt = (df_result["Risk Level"] == "HIGH RISK").sum()
-                med_cnt = (df_result["Risk Level"] == "MEDIUM RISK").sum()
-                low_cnt = (df_result["Risk Level"] == "LOW RISK").sum()
-                
-                m1.metric("Total Scanned", len(df_result))
-                m2.metric("High Risk Scams", high_cnt, delta=f"{round(high_cnt/len(df_result)*100, 1)}%", delta_color="inverse")
-                m3.metric("Medium Risk", med_cnt)
-                m4.metric("Clean / Low Risk", low_cnt)
+        # Render Results or Idle Neutral State
+        if st.session_state.last_result is not None and st.session_state.last_scanned_text:
+            result = st.session_state.last_result
+            score = result["risk_score"]
+            level = result["risk_level"]
+            indicators = result["indicators"]
+            vectors = result["vectors"]
 
-                st.dataframe(df_result, use_container_width=True)
+            # Visual Processing Stepper Feedback
+            st.markdown("""
+            <div class="processing-box">
+                <div class="step-item"><span class="step-check">✓</span> Text preprocessing & tokenization complete</div>
+                <div class="step-item"><span class="step-check">✓</span> TF-IDF feature extraction (4,000 informative terms)</div>
+                <div class="step-item"><span class="step-check">✓</span> 17 structured risk indicators evaluated</div>
+                <div class="step-item"><span class="step-check">✓</span> Linear SVM classification computed</div>
+                <div class="step-item"><span class="step-check">✓</span> Explainable risk assessment generated</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-                out_csv = df_result.to_csv(index=False)
+            # Determine Risk Glass Panel Styling
+            if level == "HIGH RISK":
+                panel_class = "risk-panel-high"
+                badge_class = "badge-high"
+                score_color = "#6B1F2B"
+                level_icon = "🔴"
+            elif level == "MEDIUM RISK":
+                panel_class = "risk-panel-medium"
+                badge_class = "badge-medium"
+                score_color = "#B45309"
+                level_icon = "🟡"
+            else:
+                panel_class = "risk-panel-low"
+                badge_class = "badge-low"
+                score_color = "#15803D"
+                level_icon = "🟢"
+
+            # Dynamic Glass Risk Panel
+            st.markdown(f"""
+            <div class="{panel_class}">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                    <div style="font-weight: 700; font-size: 0.88rem; color: var(--brown-muted); text-transform: uppercase; letter-spacing: 0.5px;">Risk Assessment</div>
+                    <div class="{badge_class}">{level_icon} {level}</div>
+                </div>
+                <div style="text-align: center; padding: 1.1rem 0;">
+                    <div class="score-display-number" style="color: {score_color};">{score}</div>
+                    <div style="font-size: 0.85rem; color: var(--brown-muted); font-weight: 600;">Threat Index Score (Out of 100)</div>
+                </div>
+            """, unsafe_allow_html=True)
+
+            # Plain-English AI Explanation
+            st.markdown("##### 💡 Plain-English AI Explanation")
+            if level == "HIGH RISK":
+                exp_text = "This posting contains multiple strong characteristics commonly associated with suspicious recruitment listings. Strong signals include payment requests or urgent application pressure."
+            elif level == "MEDIUM RISK":
+                exp_text = "This posting shows moderate risk factors. While it could belong to an informal listing, the presence of generic contact patterns or urgent wording suggests independent verification."
+            else:
+                exp_text = "No major suspicious signals were detected in this posting. The wording is consistent with standard recruitment posts, though standard caution is always recommended."
+
+            st.markdown(f"<p style='font-size: 0.88rem; color: #3A2418; line-height: 1.5;'>{exp_text}</p>", unsafe_allow_html=True)
+
+            # Why was this flagged? Section
+            st.markdown("##### 🔎 Why was this flagged?")
+            if indicators:
+                st.markdown('<div class="indicator-chip-grid">', unsafe_allow_html=True)
+                for ind in indicators:
+                    c_class = "indicator-chip-danger" if "fee" in ind["key"] else "indicator-chip"
+                    st.markdown(f'<span class="{c_class}">⚠️ {ind["title"]}</span>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+
+                with st.expander("Detailed indicator explanations", expanded=False):
+                    for ind in indicators:
+                        st.markdown(f"**{ind['title']}**")
+                        st.caption(ind["explanation"])
+            else:
+                st.markdown('<div class="indicator-chip-grid"><span class="indicator-chip-clean">✓ No unusual contact or fee traps detected</span></div>', unsafe_allow_html=True)
+
+            # Sub-Vector Risk Breakdown
+            st.markdown("<h5 style='margin-top: 1.2rem;'>📊 Sub-Vector Risk Breakdown</h5>", unsafe_allow_html=True)
+            st.markdown(f"""
+            <table class="vector-table">
+                <tr><td>💰 Upfront Payment / Fee Risk</td><td>{vectors['financial_risk']}%</td></tr>
+                <tr><td>⚡ Urgency & Pressure Language</td><td>{vectors['urgency_risk']}%</td></tr>
+                <tr><td>📡 Contact Channel Integrity</td><td>{vectors['channel_risk']}%</td></tr>
+                <tr><td>🌐 Domain & URL Risk</td><td>{vectors.get('domain_risk', 0.0)}%</td></tr>
+                <tr><td>🏢 Employer Legitimacy Score</td><td>{vectors['legitimacy_score']}%</td></tr>
+            </table>
+            """, unsafe_allow_html=True)
+
+            # Interactive Checklist: Before You Apply
+            st.markdown("""
+            <div class="checklist-box">
+                <div style="font-weight: 700; font-size: 0.88rem; color: var(--espresso-dark); margin-bottom: 6px;">📋 Before You Apply Checklist</div>
+                <div class="checklist-item">☐ Verify official company website & domain</div>
+                <div class="checklist-item">☐ Confirm recruiter email domain matches corporate domain</div>
+                <div class="checklist-item">☐ Never pay registration or security fees</div>
+                <div class="checklist-item">☐ Avoid sharing bank details or sensitive documents</div>
+            </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            # Export Audit Reports
+            st.markdown("<br>", unsafe_allow_html=True)
+            ecol1, ecol2, ecol3 = st.columns(3)
+            with ecol1:
                 st.download_button(
-                    "📥 Download Analyzed CSV",
-                    data=out_csv,
-                    file_name="analyzed_internships_batch.csv",
-                    mime="text/csv",
+                    "📥 Export JSON",
+                    data=json.dumps(result, indent=2),
+                    file_name="threat_report.json",
+                    mime="application/json",
                     use_container_width=True
                 )
-        except Exception as e:
-            st.error(f"Error processing CSV: {e}")
+            with ecol2:
+                md_rep = f"# AI Fake Internship Threat Audit\nScore: {score}/100\nLevel: {level}\n"
+                st.download_button(
+                    "📄 Export Markdown",
+                    data=md_rep,
+                    file_name="threat_report.md",
+                    mime="text/markdown",
+                    use_container_width=True
+                )
+            with ecol3:
+                html_rep = f"<html><body><h1>Threat Audit</h1><h2>Score: {score}/100 ({level})</h2></body></html>"
+                st.download_button(
+                    "🌐 Export HTML",
+                    data=html_rep,
+                    file_name="threat_report.html",
+                    mime="text/html",
+                    use_container_width=True
+                )
+        else:
+            # Idle Neutral Glass Panel
+            st.markdown("""
+            <div class="risk-panel-idle animate-scale">
+                <div style="font-size: 3.5rem; margin-bottom: 0.5rem;">🛡️</div>
+                <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.35rem; font-weight: 700; color: var(--espresso-dark);">Ready to Analyze</div>
+                <div style="font-size: 0.88rem; color: var(--brown-muted); margin-top: 0.4rem; max-width: 320px; margin-left: auto; margin-right: auto;">
+                    Paste a job description on the left and click <strong>Analyze Posting</strong> to generate a risk assessment.
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+# ===========================================================================
+# TAB 2: Preset Scenario Hub
+# ===========================================================================
+with tab_presets:
+    st.markdown("""
+    <div class="card-heading">1-Click Preset Scenario Hub</div>
+    <div class="card-desc">Select a documented real-world scenario to load it directly into the analyzer.</div>
+    """, unsafe_allow_html=True)
 
-# ---------------------------------------------------------------------------
-# TAB 4: Model Benchmark & Analytics
-# ---------------------------------------------------------------------------
-with tab_models:
-    st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
-    st.markdown('<div class="card-title">📊 Machine Learning Architecture & Benchmark Comparison</div>', unsafe_allow_html=True)
-
-    metrics_path = "models/metrics.json"
-    if os.path.exists(metrics_path):
-        with open(metrics_path, "r") as f:
-            metrics_data = json.load(f)
-
-        mc1, mc2, mc3, mc4 = st.columns(4)
-        mc1.metric("EMSCAD Dataset Size", f"{metrics_data['dataset_size']:,}")
-        mc2.metric("Best Model", metrics_data["best_model"])
-        mc3.metric("TF-IDF Features", f"{metrics_data['tfidf_max_features']:,}")
-        mc4.metric("Training Time", f"{metrics_data['training_time_seconds']}s")
-
-        st.markdown("<hr style='border-color: rgba(56,189,248,0.18); margin: 1.2rem 0;'>", unsafe_allow_html=True)
-
-        st.markdown('<div class="card-title">📈 Classifier Benchmark Results</div>', unsafe_allow_html=True)
-        
-        comp_rows = []
-        for rep in metrics_data["all_model_reports"]:
-            comp_rows.append({
-                "Model Architecture": rep["model"],
-                "Accuracy": f"{rep['accuracy']*100:.2f}%",
-                "Macro Precision": f"{rep['precision_macro']*100:.2f}%",
-                "Macro Recall": f"{rep['recall_macro']*100:.2f}%",
-                "Macro F1-Score": f"{rep['f1_macro']*100:.2f}%",
-                "Fraud Class F1": f"{rep['f1_fraudulent_class']*100:.2f}%",
-            })
-        st.dataframe(pd.DataFrame(comp_rows), use_container_width=True, hide_index=True)
-
-        chart_df = pd.DataFrame([
-            {"Model": rep["model"], "Metric": "Accuracy", "Score": rep["accuracy"] * 100}
-            for rep in metrics_data["all_model_reports"]
-        ] + [
-            {"Model": rep["model"], "Metric": "Macro F1", "Score": rep["f1_macro"] * 100}
-            for rep in metrics_data["all_model_reports"]
-        ] + [
-            {"Model": rep["model"], "Metric": "Fraud F1", "Score": rep["f1_fraudulent_class"] * 100}
-            for rep in metrics_data["all_model_reports"]
-        ])
-
-        st.bar_chart(chart_df, x="Model", y="Score", color="Metric", use_container_width=True)
-
-        st.markdown('<div class="card-title">🧩 Linear SVM Confusion Matrix (Test Set: 3,576 samples)</div>', unsafe_allow_html=True)
-        svm_rep = next(r for r in metrics_data["all_model_reports"] if r["model"] == "Linear SVM")
-        cm = svm_rep["confusion_matrix"]
-        
-        cm_cols = st.columns(2)
-        with cm_cols[0]:
-            cm_display = pd.DataFrame(
-                cm,
-                index=["Actual Legitimate (0)", "Actual Fraudulent (1)"],
-                columns=["Pred Legitimate (0)", "Pred Fraudulent (1)"]
-            )
-            st.dataframe(cm_display, use_container_width=True)
-        with cm_cols[1]:
+    preset_cols = st.columns(2)
+    idx = 0
+    for title, text in PRESETS.items():
+        with preset_cols[idx % 2]:
             st.markdown(f"""
-            - **True Negatives (Legitimate Correctly Identified)**: `{cm[0][0]:,}`
-            - **False Positives (Legitimate Flagged as Fake)**: `{cm[0][1]:,}` (Extremely Low: 0.38%)
-            - **False Negatives (Fake Missed)**: `{cm[1][0]:,}`
-            - **True Positives (Fake Correctly Caught)**: `{cm[1][1]:,}`
-            """)
+            <div class="warm-glass-card animate-fade">
+                <div style="font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 1.05rem; color: var(--maroon-primary); margin-bottom: 0.5rem;">{title}</div>
+                <div style="font-size: 0.84rem; color: var(--espresso-medium); background: #FFFDF9; padding: 10px; border-radius: 8px; border: 1px solid var(--border-warm); margin-bottom: 0.8rem; white-space: pre-wrap; max-height: 120px; overflow-y: auto;">{html.escape(text[:180])}...</div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button(f"Load '{title.split()[1] if len(title.split()) > 1 else title}'", key=f"btn_preset_{idx}"):
+                st.session_state.active_text = text
+                st.session_state.last_result = None
+                st.success(f"✓ Loaded {title} into analyzer!")
+                st.rerun()
+        idx += 1
+
+# ===========================================================================
+# TAB 3: Batch CSV Scanning
+# ===========================================================================
+with tab_batch:
+    st.markdown("""
+    <div class="card-heading">Batch CSV File Scanner</div>
+    <div class="card-desc">Upload a CSV dataset of job postings to perform automated bulk screening.</div>
+    """, unsafe_allow_html=True)
+
+    csv_file = st.file_uploader("Upload CSV File", type=["csv"])
+    if csv_file is not None:
+        try:
+            df = pd.read_csv(csv_file)
+            st.write(f"Loaded CSV with **{len(df)}** rows.")
+            text_col = st.selectbox("Select text column for scanning", options=df.columns)
+
+            if st.button("🚀 Process Batch Scan"):
+                progress_bar = st.progress(0)
+                results_list = []
+
+                for i, row in df.iterrows():
+                    val = str(row[text_col]) if pd.notna(row[text_col]) else ""
+                    res = predict(val)
+                    results_list.append({
+                        "row_id": i + 1,
+                        "text_snippet": val[:80] + "...",
+                        "risk_score": res["risk_score"],
+                        "risk_level": res["risk_level"],
+                        "triggered_indicators": len(res["indicators"])
+                    })
+                    progress_bar.progress((i + 1) / len(df))
+
+                res_df = pd.DataFrame(results_list)
+                st.success("✓ Batch scanning completed!")
+                st.dataframe(res_df, use_container_width=True)
+
+                st.download_button(
+                    "📥 Download Results CSV",
+                    data=res_df.to_csv(index=False).encode('utf-8'),
+                    file_name="batch_scan_results.csv",
+                    mime="text/csv"
+                )
+        except Exception as e:
+            st.error(f"Error parsing CSV: {e}")
+
+# ===========================================================================
+# TAB 4: Session Scan History
+# ===========================================================================
+with tab_history:
+    st.markdown("""
+    <div class="card-heading">Scan Session History</div>
+    <div class="card-desc">Review postings scanned during your current active session.</div>
+    """, unsafe_allow_html=True)
+
+    if st.session_state.history:
+        st.dataframe(pd.DataFrame(st.session_state.history), use_container_width=True)
+        if st.button("Clear History"):
+            st.session_state.history = []
+            st.rerun()
     else:
-        st.warning("Metrics file `models/metrics.json` not found.")
+        st.info("No scans performed in this session yet.")
 
-    st.markdown('</div>', unsafe_allow_html=True)
+# ===========================================================================
+# TAB 5: Model Performance & "What Does This Mean?" Viva Guide
+# ===========================================================================
+with tab_benchmarks:
+    st.markdown("""
+    <div class="card-heading">Machine Learning Model Benchmarking Studio</div>
+    <div class="card-desc">Reported evaluation metrics on the EMSCAD test set (3,576 postings).</div>
+    """, unsafe_allow_html=True)
 
-# ---------------------------------------------------------------------------
-# TAB 5: Student Scam Defense Guide
-# ---------------------------------------------------------------------------
+    # Documented Test-Set Metrics Table
+    metrics_data = [
+        {"Model": "Logistic Regression", "Accuracy": "95.61%", "Fraud Precision": "52.68%", "Fraud Recall": "90.75%", "Fraud F1": "0.6667"},
+        {"Model": "Random Forest", "Accuracy": "97.93%", "Fraud Precision": "100.00%", "Fraud Recall": "57.23%", "Fraud F1": "0.7279"},
+        {"Model": "Linear SVM (Active)", "Accuracy": "98.41%", "Fraud Precision": "90.85%", "Fraud Recall": "74.57%", "Fraud F1": "0.8190"}
+    ]
+    st.table(pd.DataFrame(metrics_data))
+
+    st.markdown("##### 📐 Linear SVM Confusion Matrix (Test Set)")
+    cm_data = [
+        {"Actual Status": "Legitimate (3,403 total)", "Predicted Legitimate": "3,390 (True Negative)", "Predicted Fraudulent": "13 (False Positive)"},
+        {"Actual Status": "Fraudulent (173 total)", "Predicted Legitimate": "44 (False Negative)", "Predicted Fraudulent": "129 (True Positive)"}
+    ]
+    st.table(pd.DataFrame(cm_data))
+
+    # Viva Guide Section: What Does This Mean?
+    st.markdown("""
+    <div class="warm-glass-card animate-fade">
+        <h4 style="font-family: 'Playfair Display', serif; color: var(--maroon-primary); margin-bottom: 0.75rem;">🎓 "What Does This Mean?" — Viva Explanation Guide</h4>
+        <ul>
+            <li><strong>Accuracy (98.41%):</strong> Overall percentage of test postings correctly classified as legitimate or fraudulent.</li>
+            <li><strong>Fraud Precision (90.85%):</strong> Out of all postings flagged as fraudulent by Linear SVM, 90.85% were actually fraudulent (very low false alarms).</li>
+            <li><strong>Fraud Recall (74.57%):</strong> Out of all actual fraudulent postings in the test set, the model correctly caught 74.57%.</li>
+            <li><strong>F1-Score (0.8190):</strong> Harmonic mean balancing precision and recall for imbalanced datasets.</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Output Plots
+    img_col1, img_col2 = st.columns(2)
+    with img_col1:
+        if os.path.exists("outputs/model_comparison.png"):
+            st.image("outputs/model_comparison.png", caption="Model Metric Comparison", use_container_width=True)
+    with img_col2:
+        if os.path.exists("outputs/confusion_matrix_linear_svm.png"):
+            st.image("outputs/confusion_matrix_linear_svm.png", caption="Linear SVM Confusion Matrix", use_container_width=True)
+
+# ===========================================================================
+# TAB 6: Student Scam-Defense Guide
+# ===========================================================================
 with tab_guide:
-    st.markdown('<div class="cyber-card">', unsafe_allow_html=True)
-    st.markdown('<div class="card-title">🛡️ Student Internship Scam Survival Handbook</div>', unsafe_allow_html=True)
-    
-    g_col1, g_col2 = st.columns(2)
-    
-    with g_col1:
-        st.markdown("""
-        ### 🚨 Top 5 Red Flags in Internship Postings
-        1. **Registration / Training / Kit Fees**: Legitimate companies pay *you*, never the other way around. Any fee demand is an immediate scam.
-        2. **WhatsApp / Telegram Only Recruitment**: No official corporate email, no website domain, and interviews conducted entirely over chat.
-        3. **Too Good to be True Stipends**: Promises of Rs 50,000–80,000/month for simple data entry or 2 hours of copy-pasting.
-        4. **Immediate Hiring Without Evaluation**: Selection email sent within minutes with zero technical or behavioral interview.
-        5. **Fake Offer Letters**: Stolen logos from Google, Microsoft, or Amazon with spelling errors and personal Gmail contact addresses.
-        """)
+    st.markdown("""
+    <div class="card-heading">Internship Scam Defense Center</div>
+    <div class="card-desc">Essential safety guidelines for students to identify and avoid recruitment fraud.</div>
+    """, unsafe_allow_html=True)
 
-    with g_col2:
-        st.markdown("""
-        ### ✅ 4-Step Verification Playbook
-        1. **Verify Company on MCA21 / LinkedIn**: Check if the company is legally registered on the Ministry of Corporate Affairs portal (`mca.gov.in`) and has real employees on LinkedIn.
-        2. **Check Email Domain MX Records**: Genuine HR emails come from `@company.com`, not `@gmail.com` or `@yahoo.com`.
-        3. **Never Share Sensitive Credentials**: Never share bank passwords, OTPs, or send money for "refundable security deposits".
-        4. **Official Grievance Portals**:
-           - 📞 **National Cyber Crime Helpline**: Dial `1930`
-           - 🌐 **Cyber Crime Reporting**: [cybercrime.gov.in](https://cybercrime.gov.in)
-           - 📢 **Report to College Training & Placement Cell**
-        """)
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# ---------------------------------------------------------------------------
-# Footer & Ethics Disclaimer
-# ---------------------------------------------------------------------------
-st.markdown("""
-<div style="text-align: center; color: var(--text-muted); font-size: 0.80rem; padding: 1.6rem 0; border-top: 1px solid rgba(56,189,248,0.15); margin-top: 2.2rem;">
-    🛡️ <strong>AI Fake Internship Threat Scanner</strong> • Academic ML Decision-Support Prototype • 
-    Trained on EMSCAD (17,880 listings) with Explainable Heuristics • Always independently verify job offers before transferring funds.
-</div>
-""", unsafe_allow_html=True)
+    st.markdown("""
+    <div class="warm-glass-card animate-fade">
+        <h4 style="color: var(--maroon-primary); margin-bottom: 0.75rem;">🚨 Red Flag Checklist for Students</h4>
+        <ul>
+            <li><strong>Upfront Fee Demands:</strong> Legitimate employers never ask candidates to pay for training, processing, or laptop deposits.</li>
+            <li><strong>Free Email Domains:</strong> Be suspicious if recruiters write from free webmail domains (e.g. @gmail.com) rather than corporate email domains.</li>
+            <li><strong>Guaranteed High Income:</strong> Promises of ₹50,000+ per month for entry-level work with "no experience required" are common scam traps.</li>
+            <li><strong>Messaging App Interviews:</strong> Employers using only WhatsApp or Telegram without corporate video interviews or emails require extra verification.</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
